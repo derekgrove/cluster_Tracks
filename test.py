@@ -1,39 +1,39 @@
-import pandas as pd
-import numpy as np
+truths = []
+clusters = []
 
-# Read the entire file
-with open('cluster_data.txt', 'r') as f:
-    content = f.read()
+with open('mini_data.txt', 'r') as f:
+    lines = f.read().split('\n')  # split the file content by new lines
 
-# Split the content by line breaks
-data_sets = content.split('\n')
+    for line in lines:
+        elements = line.split(', ')  # split each line by a comma + space
+        if len(elements) >= 7:  # check if the line has at least 5 elements
+            truths.append([float(e) for e in elements[:7]])  # add first 5 elements to the first list
+            clusters.append([int(e) for e in elements[7:]])  # add the rest to the second list
+print("first list")
+print(truths)
+print("second list")
+print(clusters)
 
-# Print the number of data sets
-#print(f"Number of data sets: {len(data_sets)}")
+# below line verifies that the variable type of every element in the second array is integers
+# if a single element were not an integer then is_all_int would be set to False after going through the loop
 
+#is_all_int = True
+#for sublist in second_list:
+#    for item in sublist:
+#        if not isinstance(item, int):
+#            is_all_int = False
+#            break
+#print(is_all_int)
 
-dfs = []
-
-for data_set in data_sets:
-    # Skip if line is empty
-    if data_set.strip() == '':
-        continue
-
-    # Convert string to list of floats
-    data = list(map(float, data_set.split()))
-
-    # Reshape the data and create DataFrame
-    data = np.array(data).reshape(-1, 3)
-    df = pd.DataFrame(data, columns=['x', 'y', 'charge'])
-
-    # Sort and reset index
-    df = df.sort_values(by=['x', 'y']).reset_index(drop=True)
-    
-    # Add DataFrame to the list
-    dfs.append(df)
-
-# Print dataframes
-for i, df in enumerate(dfs):
-    print(f"Data set {i+1}:")
-    print(df)
-    print()
+# Our current format:
+# index[0], type of particle: 0 = lithium, 1 = alpha
+# index[1], cluster position in x
+# index[2], cluster position in y
+# index[3], local start X
+# index[4], local start Y
+# index[5], local end X
+# index[6], local end Y
+# then, by index[7], we start printing out the pixel values in an x, y, charge, x, y, charge... repeating pattern
+# each new line is a new cluster
+# since we will eventually not need these first 5 data points, I will split this data into two lists
+# and when the time comes, we just remove all uses and instantiation of the first list
