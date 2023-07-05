@@ -1,7 +1,7 @@
 truths = []
 clusters = []
 
-with open('mini_data.txt', 'r') as f:
+with open('raw_data.txt', 'r') as f:
     lines = f.read().split('\n')  # split the file content by new lines
 
     for line in lines:
