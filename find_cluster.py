@@ -7,4 +7,3 @@ import numpy as np
 filename = 'cluster_data.txt'
 data = np.loadtxt(filename, delimiter=',', skiprows=1, dtype=str)
 print(data)
-#print(data[3][5])
