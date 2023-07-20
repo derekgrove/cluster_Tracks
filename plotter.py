@@ -17,6 +17,9 @@ def plot_cluster(cluster):
     plt.colorbar(label='Charge')
     plt.xlabel('x')
     plt.ylabel('y')
+    plt.xticks(np.arange(xmin, xmax+1, 1))
+    plt.yticks(np.arange(ymin, ymax+1, 1))
+    plt.grid(True)
     plt.show()
 
 def plot_cluster_zoomed(cluster):
@@ -32,10 +35,13 @@ def plot_cluster_zoomed(cluster):
     
     histogram, xedges, yedges = np.histogram2d(xs, ys, weights=charges, bins=[range(xmin, xmax+1), range(ymin, ymax+1)])
 
-    plt.pcolormesh(xedges, yedges, histogram.T, norm=colors.LogNorm(), cmap='Purples')
+    plt.pcolormesh(xedges, yedges, histogram.T, norm=colors.LogNorm(), cmap='magma')
     plt.colorbar(label='Charge')
     plt.xlabel('x')
     plt.ylabel('y')
+    plt.xticks(np.arange(xmin, xmax+1, 1))
+    plt.yticks(np.arange(ymin, ymax+1, 1))
+    plt.grid(True)
     plt.show()
 
     

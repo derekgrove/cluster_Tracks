@@ -1,3 +1,5 @@
+# This function will calculate the "center of charge" exactly like you would center of mass.
+
 def calculate_charge(cluster):
     xs = [cluster[i] for i in range(0, len(cluster), 3)]
     ys = [cluster[i] for i in range(1, len(cluster), 3)]

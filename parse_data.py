@@ -1,3 +1,4 @@
+# Organize the data into two separate arrays, the first array is knowledge we won't have access to from experiment, its just values from the simulation we can use to check our work.
 def parse_data(filename):
     truths = []
     clusters = []
