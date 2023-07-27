@@ -10,8 +10,12 @@ def parse_data(filename):
             elements = line.split(', ')  # split each line by a comma + space
             if len(elements) >= 7:  # check if the line has at least 7 elements
                 truths.append([float(e) for e in elements[:7]])  # add first 7 elements to the first list
-                clusters.append([int(e) for e in elements[7:]])  # add the rest to the second list
+                # Convert data to list of tuples (x, y, charge)
+                cluster = [int(e) for e in elements[7:]]
+                cluster = [(cluster[i], cluster[i+1], cluster[i+2]) for i in range(0, len(cluster), 3)]
+                clusters.append(cluster)  # add the rest to the second list
             else: 
                 continue
                 
     return truths, clusters
+

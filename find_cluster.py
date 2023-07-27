@@ -1,30 +1,75 @@
 #should sort through an array (256x256, size of pixel) and locate two things: skirt, core
 #once those are found, should determine the major length and minor length
 #maybe we remove the delta rays here as well, do this with with a morphology operator
-def create_cluster(pixel_data, x, y):
-    # Convert x, y to integers
-    x = int(x)
-    y = int(y)
+import numpy as np
 
-    # Define the cluster list
-    cluster = []
+def agglomerate_pixels(cluster, charge_threshold):
+    # Initialize visited set and graph
+    visited = set()
+    graph = {(x, y): set() for x, y, _ in cluster}
+    pixel_info = {(x, y): charge for x, y, charge in cluster}
 
-    # Iterate through the pixel data in steps of 3 (since each pixel's data is in three parts)
-    for i in range(0, len(pixel_data), 3):
-        px, py, charge = pixel_data[i:i+3]
+    # Build graph
+    for x, y, _ in cluster:
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if (x + dx, y + dy) in graph:
+                    graph[(x, y)].add((x + dx, y + dy))
 
-        # Check if the pixel is within the specified range
-        if (x - 1 <= px <= x + 1) and (y - 1 <= py <= y + 1):
-            # If it is, append its data as a list to the cluster list
-            pixel = [px, py, charge]
-            cluster.append(pixel)
+    # Depth-first search
+    def dfs(node):
+        visited.add(node)
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                dfs(neighbor)
 
-    return cluster
+    # Start DFS from the pixel with the highest charge
+    start_node = max(cluster, key=lambda pixel: pixel[2])[:2]
+    dfs(start_node)
 
-# Example usage:
-#pixel_data = [76, 43, 1288558, 76, 44, 429279, 76, 45, 858705, 76, 46, 1288635, 77, 42, 1288458, 77, 43, 4386506, 77, 44, 15839894, 77, 45, 23389447, 77, 46, 8160435, 77, 47, 1288497, 78, 41, 429392, 78, 42, 1717826, 78, 43, 21853510, 78, 44, 82552974, 78, 45, 88274910, 78, 46, 19082788, 78, 47, 3865416, 78, 48, 429642, 79, 42, 1861333, 79, 43, 29853891, 79, 44, 123599631, 79, 45, 113251555, 79, 46, 33299005, 79, 47, 3670150, 79, 48, 429393, 80, 42, 1718036, 80, 43, 10492117, 80, 44, 35844701, 80, 45, 31129890, 80, 46, 8916696, 80, 47, 1288251, 81, 43, 2147723, 81, 44, 2863957, 81, 45, 3240776, 81, 46, 429472, 82, 44, 429536]
-#x = 78.66152245649133
-#y = 44.51666220841505
+    # Get the maximum charge in the cluster
+    max_charge = max(pixel_info.values())
 
-#cluster = create_cluster(pixel_data, x, y)
-#print(cluster)
+    # Filter the visited pixels based on the charge threshold
+    filtered_pixels = [[x, y, pixel_info[(x, y)]] for x, y in visited if pixel_info[(x, y)] >= max_charge / charge_threshold]
+
+    return filtered_pixels
+
+
+def find_optimal_angle(cluster, center_of_charge):
+    center_x, center_y, _ = center_of_charge
+
+    # Define the length of the line
+    line_length = 50
+
+    # Define a list to store the number of intersected pixels for each angle
+    intersected_pixels = []
+
+    # For each angle from 0 to 360 degrees
+    for angle in range(360):
+        # Calculate the coordinates of the line
+        dx = line_length * np.cos(np.radians(angle))
+        dy = line_length * np.sin(np.radians(angle))
+
+        # Determine the start and end points of the line
+        x1, y1 = center_x - dx, center_y - dy
+        x2, y2 = center_x + dx, center_y + dy
+
+        # Check each pixel in the cluster
+        intersected = 0
+        for x, y, _ in cluster:
+            # Determine if the pixel is intersected by the line
+            d = abs((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1) / np.sqrt((y2 - y1)**2 + (x2 - x1)**2)
+            if d < 0.5:
+                intersected += 1
+
+        intersected_pixels.append(intersected)
+
+    # Find the maximum number of intersected pixels
+    max_intersected = max(intersected_pixels)
+
+    # Find the angles that yield the maximum number of intersected pixels
+    optimal_angles = [angle for angle, intersected in enumerate(intersected_pixels) if intersected == max_intersected]
+
+    # Return the minimum and maximum optimal angles
+    return min(optimal_angles), max(optimal_angles)
