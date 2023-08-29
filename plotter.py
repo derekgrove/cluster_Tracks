@@ -92,27 +92,66 @@ def plot_z(start_x, start_y, end_x, end_y):
     delta_y = end_y - start_y
     delta_x = end_x - start_x
 
-def plot_charge_histogram(cluster):
-    # Create empty dictionaries to store summed charges for each x and y coordinate
+def plot_charge_histograms(cluster, cluster_number):
+    # Initialize dictionaries to hold the charge values for each x and y coordinate
     charge_x = {}
     charge_y = {}
 
+    # Populate the charge_x and charge_y dictionaries
     for x, y, charge in cluster:
-        charge_x[x] = charge_x.get(x, 0) + charge  # Sum charges for the given x-coordinate
-        charge_y[y] = charge_y.get(y, 0) + charge  # Sum charges for the given y-coordinate
+        if x not in charge_x:
+            charge_x[x] = 0
+        if y not in charge_y:
+            charge_y[y] = 0
+        charge_x[x] += charge
+        charge_y[y] += charge
 
-    # Plot histograms
-    fig, ax = plt.subplots(2, 1, figsize=(8, 10))
+    # Prepare the data for plotting
+    x_coords, x_charges = zip(*sorted(charge_x.items()))
+    y_coords, y_charges = zip(*sorted(charge_y.items()))
 
-    ax[0].bar(charge_x.keys(), charge_x.values(), align='center', color='blue')
-    ax[0].set_title('Charge vs X')
-    ax[0].set_xlabel('X-coordinate')
-    ax[0].set_ylabel('Total Charge')
+    # Create subplots
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 
-    ax[1].bar(charge_y.keys(), charge_y.values(), align='center', color='red')
-    ax[1].set_title('Charge vs Y')
-    ax[1].set_xlabel('Y-coordinate')
-    ax[1].set_ylabel('Total Charge')
+    # Calculate bins for x and y
+    x_bins = np.arange(min(x_coords), max(x_coords) + 2) - 0.5
+    y_bins = np.arange(min(y_coords), max(y_coords) + 2) - 0.5
 
+    # Plot charge distribution in x
+    axs[0].hist(x_coords, weights=x_charges, bins=x_bins, edgecolor='black', alpha=0.7)
+    axs[0].set_title(f'Charge Distribution in x for Cluster {cluster_number}')
+    axs[0].set_xlabel('x')
+    axs[0].set_ylabel('Total Charge')
+
+    # Plot charge distribution in y
+    axs[1].hist(y_coords, weights=y_charges, bins=y_bins, edgecolor='black', alpha=0.7)
+    axs[1].set_title(f'Charge Distribution in y for Cluster {cluster_number}')
+    axs[1].set_xlabel('y')
+    axs[1].set_ylabel('Total Charge')
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+def plot_pixel_histograms(x_values, y_values, cluster_number):
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    
+    # Calculate bins for x and y
+    x_bins = np.arange(min(x_values), max(x_values) + 2) - 0.5
+    y_bins = np.arange(min(y_values), max(y_values) + 2) - 0.5
+    
+    # Plot histogram for x-values
+    axs[0].hist(x_values, bins=x_bins, edgecolor='black', alpha=0.7)
+    axs[0].set_title(f'Pixel Distribution in x for Cluster {cluster_number}')
+    axs[0].set_xlabel('x')
+    axs[0].set_ylabel('Frequency')
+    
+    # Plot histogram for y-values
+    axs[1].hist(y_values, bins=y_bins, edgecolor='black', alpha=0.7)
+    axs[1].set_title(f'Pixel Distribution in y for Cluster {cluster_number}')
+    axs[1].set_xlabel('y')
+    axs[1].set_ylabel('Frequency')
+    
     plt.tight_layout()
     plt.show()
